@@ -5,24 +5,24 @@ block content
     img.ui.fluid.image(src=process.env.SITE_PICTURE)
   .eight.wide.computer.eight.wide.tablet.sixteen.wide.mobile.column
     .ui.card.fluid(style="padding: 20px; margin-top: 90px;")
-      h2.ui.header Sign Up
+      h2.ui.header 注冊
       form.ui.form(id='signup-form', action=(process.env.POST_SURVEY_WITH_QUALTRICS ? `/signup?r_id=${r_id}`: '/signup'), method='POST')
         input(type='hidden', name='_csrf', value=_csrf)
         .field
-          label(for='username') Username
-          input(type='text', name='username', id='username', placeholder='Username', autofocus, required)
+          label(for='username') 用戶名
+          input(type='text', name='username', id='username', placeholder='用戶名', autofocus, required)
         .field
           label(for='mturkID') !{process.env.IDENTIFIER}
           input(type='text', name='mturkID', id='mturkID', placeholder=process.env.IDENTIFIER, required)
         .field
-          label(for='email') Email (will not be publicly displayed)
-          input(type='email', name='email', id='email', placeholder='Email', required)
+          label(for='email') 電子郵箱（不會被公開顯示）
+          input(type='email', name='email', id='email', placeholder='電子郵箱', required)
         .field
-          label(for='password') Password
-          input(type='password', name='password', id='password', placeholder='Password', minlength="4", required)
+          label(for='password') 密碼
+          input(type='password', name='password', id='password', placeholder='密碼', minlength="4", required)
         .field
-          label(for='confirmPassword') Confirm Password 
-          input(type='password', name='confirmPassword', id='confirmPassword', placeholder='Confirm Password', minlength="4", required)
+          label(for='confirmPassword') 確認密碼 
+          input(type='password', name='confirmPassword', id='confirmPassword', placeholder='確認密碼', minlength="4", required)
           span(style="color: green; visibility:hidden; display: inline-block;")#passwordsMatch  
             i.icon.check 
             | Passwords Match
@@ -30,9 +30,9 @@ block content
           .ui.checkbox
             input(type='checkbox', name='tos', tabindex="0", id='tos', required)
             label(for='tos')
-              | I agree to the 
-              a(href='/tos', target="_blank") Terms and Conditions.
-        button.ui.large.button(type='submit') Sign Up
+              | 我已閱讀並同意 
+              a(href='/tos', target="_blank") 知情同意書、條款和政策.
+        button.ui.large.button(type='submit') 注冊
 
 block scripts
   script(src='/public/js/profile.js')
