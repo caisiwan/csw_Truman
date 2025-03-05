@@ -15,11 +15,11 @@
   .two.ui.bottom.attached.icon.buttons
     .ui.reply.button(tabindex='0')
       i.reply.icon
-      |  Reply
+      |  評論
     .ui.labeled.button(tabindex='0')
       .ui.like.button(class=val.liked ? "red" : null)
         i.heart.icon
-        |  Like
+        |  贊
       a.ui.basic.red.left.pointing.label.count=val.likes+(val.liked ? 1 : 0)      
   if val.comments.length > 0
     .content
@@ -41,10 +41,10 @@
                     .rating
                       i.heart.icon(class=comment.liked ? "red" : null)
                       span.num=comment.likes+(comment.liked ? 1 : 0)
-                      |  Likes
+                      |  個贊
                   .text=comment.body
                   .actions
-                    a.like.comment(class=comment.liked ? "red" : null) !{comment.liked ? "Unlike" : "Like"}
+                    a.like.comment(class=comment.liked ? "red" : null) !{comment.liked ? "取消贊" : "贊"}
             //- Else this is a normal comment from the script
             else
               .comment(commentID=comment.commentID)
@@ -57,11 +57,11 @@
                     .rating
                       i.heart.icon(class=comment.liked ? "red" : null)
                       span.num=comment.likes+(comment.liked ? 1 : 0)
-                      |  Likes
+                      |  個贊
                   .text=comment.body
                   .actions
-                    a.like.comment(class=comment.liked ? "red" : null) !{comment.liked ? "Unlike" : "Like"}
-                    a.flag.comment Flag
+                    a.like.comment(class=comment.liked ? "red" : null) !{comment.liked ? "取消贊" : "贊"}
+                    a.flag.comment 舉報
   .extra.content
     .ui.fluid.left.labeled.right.icon.input
       .ui.label
@@ -71,5 +71,5 @@
           img.ui.avatar.image.small(src=user.gravatar(60), name=user.profile.name || user.username || user.id)            
       .ui.form
         .field 
-          textarea.newcomment(type='text', placeholder='Write a Comment' rows='1')
+          textarea.newcomment(type='text', placeholder='寫評論' rows='1')
       i.big.send.link.icon
