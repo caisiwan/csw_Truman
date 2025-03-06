@@ -106,7 +106,7 @@ exports.getFeed = function(user_posts, script_feed, user, order, removeFlaggedCo
                                 }
                             }
                             // Check if this comment is by a blocked user: If true and removedBlockedUserContent is true, remove the comment.
-                            if (user.blocked.includes(commentObject.actor.username) && removedBlockedUserContent) {
+                            if (commentObject.actor && commentObject.actor.username && user.blocked.includes(commentObject.actor.username) && removedBlockedUserContent) {
                                 script_feed[0].comments.splice(script_feed[0].comments.indexOf(commentObject), 1);
                             }
                         }
