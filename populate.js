@@ -7,7 +7,6 @@ console.log(color_start, 'Started populate.js script...');
 const async = require('async');
 const Actor = require('./models/Actor.js');
 const Script = require('./models/Script.js');
-const Notification = require('./models/Notification.js');
 const _ = require('lodash');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
@@ -16,16 +15,10 @@ const CSVToJSON = require("csvtojson");
 //Input Files
 const actor_inputFile = './input/actors.csv';
 const posts_inputFile = './input/posts.csv';
-const replies_inputFile = './input/replies.csv';
-const notifications_inputFile = './input/notifications (read, like).csv';
-const notifications_replies_inputFile = './input/notifications (reply).csv';
 
 // Variables to be used later.
 var actors_list;
 var posts_list;
-var comment_list;
-var notification_list;
-var notification_reply_list;
 
 dotenv.config({ path: '.env' });
 
@@ -59,14 +52,6 @@ async function doPopulate() {
                     resolve("done");
                 });
             });
-        }).then(function(result) { //Drop the notifications collection
-            return new Promise((resolve, reject) => {
-                console.log(color_start, "Dropping notifications...");
-                db.collections['notifications'].drop(function(err) {
-                    console.log(color_success, 'Notifications collection dropped');
-                    resolve("done");
-                });
-            });
             /***
             Converting CSV files to JSON
             ***/
@@ -88,38 +73,12 @@ async function doPopulate() {
                     resolve("done");
                 });
             });
-        }).then(function(result) { //Convert the comments csv file to json, store in comment_list
-            return new Promise((resolve, reject) => {
-                console.log(color_start, "Reading comment list...");
-                CSVToJSON().fromFile(replies_inputFile).then(function(json_array) {
-                    comment_list = json_array;
-                    console.log(color_success, "Finished getting the comment list");
-                    resolve("done");
-                });
-            });
-        }).then(function(result) { //Convert the comments csv file to json, store in comment_list\
-            return new Promise((resolve, reject) => {
-                console.log(color_start, "Reading notification list...");
-                CSVToJSON().fromFile(notifications_inputFile).then(function(json_array) {
-                    notification_list = json_array;
-                    console.log(color_success, "Finished getting the notification list");
-                    resolve("done");
-                });
-            });
-        }).then(function(result) { //Convert the notification reply csv file to json, store in comment_list\
-            return new Promise((resolve, reject) => {
-                console.log(color_start, "Reading notification reply list...");
-                CSVToJSON().fromFile(notifications_replies_inputFile).then(function(json_array) {
-                    notification_reply_list = json_array;
-                    console.log(color_success, "Finished getting the notification reply list");
-                    resolve("done");
-                });
-            });
+        })
             /*************************
             Create all the Actors in the simulation
             Must be done before creating any other instances
             *************************/
-        }).then(function(result) {
+        .then(function(result) {
             console.log(color_start, "Starting to populate actors collection...");
             return new Promise((resolve, reject) => {
                 async.each(actors_list, async function(actor_raw, callback) {
@@ -133,7 +92,8 @@ async function doPopulate() {
                                 bio: actor_raw.bio,
                                 picture: actor_raw.picture
                             },
-                            class: actor_raw.class
+                            class: actor_raw.class,
+                            condition: actor_raw.condition
                         };
 
                         const actor = new Actor(actordetail);
@@ -173,7 +133,8 @@ async function doPopulate() {
                                 likes: new_post.likes || getLikes(),
                                 actor: act,
                                 time: timeStringToNum(new_post.time) || null,
-                                class: new_post.class
+                                class: new_post.class,
+                                condition: new_post.condition
                             }
 
                             const script = new Script(postdetail);
@@ -195,8 +156,8 @@ async function doPopulate() {
                         }
                         // Return response
                         console.log(color_success, "All posts added to database!")
+                        mongoose.connection.close(); // 关闭连接
                         resolve('Promise is resolved successfully.');
-                        return 'Loaded Posts';
                     }
                 );
             });
@@ -207,155 +168,7 @@ async function doPopulate() {
             Takes a while to run because of this.
             *************************/
         })
-        .then(function(result) {
-            console.log(color_start, "Starting to populate post replies...");
-            return new Promise((resolve, reject) => {
-                async.eachSeries(comment_list, async function(new_reply, callback) {
-                        const act = await Actor.findOne({ username: new_reply.actor }).exec();
-                        if (act) {
-                            const pr = await Script.findOne({ postID: new_reply.postID }).exec();
-                            if (pr) {
-                                if (pr.time > timeStringToNum(new_reply.time)) {
-                                    console.log(color_error, "ERROR: The simulated time for this comment (commentID: " + new_reply.id + ") is before the simulated time of the post.");
-                                    next(err);
-                                }
-                                const comment_detail = {
-                                    commentID: new_reply.id,
-                                    body: new_reply.body,
-                                    likes: new_reply.likes || getLikesComment(),
-                                    actor: act,
-                                    time: timeStringToNum(new_reply.time),
-                                    class: new_reply.class
-                                };
-
-                                pr.comments.push(comment_detail);
-                                pr.comments.sort(function(a, b) { return a.time - b.time; });
-
-                                try {
-                                    await pr.save();
-                                } catch (err) {
-                                    console.log(color_error, "ERROR: Something went wrong with saving reply in database");
-                                    next(err);
-                                }
-                            } else { //Else no post found
-                                console.log(color_error, "ERROR: Post not found in database");
-                                callback();
-                            }
-
-                        } else { //Else no actor found
-                            console.log(color_error, "ERROR: Actor not found in database");
-                            callback();
-                        }
-                    },
-                    function(err) {
-                        if (err) {
-                            console.log(color_error, "ERROR: Something went wrong with saving replies in database");
-                            callback(err);
-                        }
-                        // Return response
-                        console.log(color_success, "All replies added to database!");
-                        resolve('Promise is resolved successfully.');
-                        return 'Loaded Replies';
-                    }
-                );
-
-            });
-            /*************************
-            Creates each notification(replies) and uploads it to the DB
-            Actors must be in DB first to add them correctly to the post
-            *************************/
-        })
-        .then(function(result) {
-            console.log(color_start, "Starting to populate notifications (replies) collection...");
-            return new Promise((resolve, reject) => {
-                async.each(notification_reply_list, async function(new_notify, callback) {
-                        const act = await Actor.findOne({ username: new_notify.actor }).exec();
-                        if (act) {
-                            const notifydetail = {
-                                actor: act,
-                                notificationType: 'reply',
-                                time: timeStringToNum(new_notify.time),
-                                userPostID: new_notify.userPostID,
-                                replyBody: new_notify.body,
-                                class: new_notify.class
-                            };
-
-                            const notify = new Notification(notifydetail);
-                            try {
-                                await notify.save();
-                            } catch (err) {
-                                console.log(color_error, "ERROR: Something went wrong with saving notification(reply) in database");
-                                console.log(err);
-                                next(err);
-                            }
-                        } else { //Else no actor found
-                            console.log(color_error, "ERROR: Actor not found in database");
-                            callback();
-                        }
-                    },
-                    function(err) {
-                        if (err) {
-                            console.log(color_error, "ERROR: Something went wrong with saving notifications(replies) in database");
-                        }
-                        // Return response
-                        console.log(color_success, "All notifications(replies) added to database!");
-                        resolve('Promise is resolved successfully.');
-                        return 'Loaded Notifications';
-                    }
-                );
-            });
-            /*************************
-            Creates each notification(likes, reads) and uploads it to the DB
-            Actors must be in DB first to add them correctly to the post
-            *************************/
-        }).then(function(result) {
-            console.log(color_start, "Starting to populate notifications (likes, reads) collection...");
-            return new Promise((resolve, reject) => {
-                async.each(notification_list, async function(new_notify, callback) {
-                        const act = await Actor.findOne({ username: new_notify.actor }).exec();
-                        if (act) {
-                            const notifydetail = {
-                                actor: act,
-                                notificationType: new_notify.type,
-                                time: timeStringToNum(new_notify.time),
-                                class: new_notify.class
-                            };
-
-                            if (new_notify.userPostID >= 0 && new_notify.userPostID) {
-                                notifydetail.userPostID = new_notify.userPostID;
-                            } else if (new_notify.userReplyID >= 0 && new_notify.userReplyID) {
-                                notifydetail.userReplyID = new_notify.userReplyID;
-                            } else if (new_notify.actorReply >= 0 && new_notify.actorReply) {
-                                notifydetail.actorReply = new_notify.actorReply;
-                            }
-
-                            const notify = new Notification(notifydetail);
-                            try {
-                                await notify.save();
-                            } catch (err) {
-                                console.log(color_error, "ERROR: Something went wrong with saving notification(like, read) in database");
-                                next(err);
-                            }
-                        } else { //Else no actor found
-                            console.log(color_error, "ERROR: Actor not found in database");
-                            callback();
-                        }
-                    },
-                    function(err) {
-                        if (err) {
-                            console.log(color_error, "ERROR: Something went wrong with saving notifications in database");
-                            callback(err);
-                        }
-                        // Return response
-                        console.log(color_success, "All notifications added to database!");
-                        mongoose.connection.close();
-                        resolve('Promise is resolved successfully.');
-                        return 'Loaded Notifications';
-                    }
-                );
-            });
-        })
-}
+}        
 
 //capitalize a string
 String.prototype.capitalize = function() {
