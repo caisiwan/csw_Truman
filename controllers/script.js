@@ -46,7 +46,6 @@ exports.getScript = async(req, res, next) => {
         let script_feed = await Script.find({
                 class: { "$in": ["", user.experimentalCondition] }
             })
-            .where('time').lte(time_diff).gte(time_limit)
             .sort('-time')
             .populate('actor')
             .populate('comments.actor')
