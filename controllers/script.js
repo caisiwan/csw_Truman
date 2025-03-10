@@ -52,7 +52,7 @@ exports.getScript = async(req, res, next) => {
             .exec();
 
         // Array of any user-made posts within the past 24 hours, sorted by time they were created.
-        let user_posts = user.getPostInPeriod(time_limit, time_diff);
+        let user_posts = user.getPostInPeriod();
         user_posts.sort(function(a, b) {
             return b.relativeTime - a.relativeTime;
         });
