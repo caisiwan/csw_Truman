@@ -13,9 +13,6 @@ block content
         label(for='name') 姓名
         input.form-control(type='text', name='name', id='name', value=user.profile.name)
       .field
-        label(for='location') 位置
-        input.form-control(type='text', name='location', id='location', value=user.profile.location)
-      .field
         label(for='bio') 個人簡介
         textarea(rows='2', name='bio', id='bio')=user.profile.bio
       .field.image-upload
