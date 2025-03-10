@@ -240,10 +240,8 @@ userSchema.methods.getUserPostByID = function(postID) {
 };
 
 // Get user posts within the min/max time period
-userSchema.methods.getPostInPeriod = function(min, max) {
-    return this.posts.filter(function(post) {
-        return post.relativeTime >= min && post.relativeTime <= max;
-    });
+userSchema.methods.getPostInPeriod = function() {
+    return this.posts;
 }
 
 /**
