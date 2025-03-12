@@ -169,7 +169,7 @@ exports.postSignupInfo = async(req, res, next) => {
 
         await user.save();
         req.flash('success', { msg: 'Profile information has been updated.' });
-        return res.redirect('/com');
+        return res.redirect('/');
     } catch (err) {
         next(err);
     }
