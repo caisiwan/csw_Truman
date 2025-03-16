@@ -116,7 +116,22 @@ exports.postSignup = async(req, res, next) => {
         ###############################*/
         const numConditions = process.env.NUM_EXP_CONDITIONS;
         const experimentalConditionNames = process.env.EXP_CONDITIONS_NAMES.split(",");
-        const experimentalCondition = experimentalConditionNames[Math.floor(Math.random() * numConditions)];
+        const conditionCounts = await User.aggregate([
+            { $group: { _id: "$experimentalCondition", count: { $sum: 1 } } }
+        ]);
+        const countsMap = new Map();
+        experimentalConditionNames.forEach(condition => countsMap.set(condition, 0));
+        conditionCounts.forEach(item => countsMap.set(item._id, item.count));
+        let minCount = Infinity;
+        let targetCondition = experimentalConditionNames[0];
+        for (const condition of experimentalConditionNames) {
+            const count = countsMap.get(condition);
+            if (count < minCount) {
+                minCount = count;
+                targetCondition = condition;
+            }
+        }
+        const experimentalCondition = targetCondition;
 
         const surveyLink = process.env.POST_SURVEY ?
             process.env.POST_SURVEY +
