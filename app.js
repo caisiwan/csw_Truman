@@ -182,19 +182,19 @@ app.post('/post/new', userpostupload.single('picinput'), scriptController.newPos
 app.post('/pageLog', passportConfig.isAuthenticated, userController.postPageLog);
 app.post('/pageTimes', passportConfig.isAuthenticated, userController.postPageTime);
 
-//app.get('/com', function(req, res) {
-//    const feed = req.query.feed == "true" ? true : false; //Are we accessing the community rules from the feed?
-//    res.render('com', {
-//        title: 'Community Rules',
-//        feed
-//    });
-//});
+app.get('/com', function(req, res) {
+    const feed = req.query.feed == "true" ? true : false; //Are we accessing the community rules from the feed?
+    res.render('com', {
+        title: 'Community Rules',
+        feed
+    });
+});
 
-//app.get('/info', passportConfig.isAuthenticated, function(req, res) {
-//    res.render('info', {
-//        title: 'User Docs'
-//    });
-//});
+app.get('/info', passportConfig.isAuthenticated, function(req, res) {
+    res.render('info', {
+        title: 'User Docs'
+    });
+});
 
 app.get('/tos', function(req, res) { res.render('tos', { title: 'Terms of Service' }); });
 
