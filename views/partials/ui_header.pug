@@ -24,12 +24,11 @@
             i.dropdown.icon
             .left.menu
               if user.consent
-                a.item(href='/me') 我的資料
+                a.item(href='/me') 我的帖子
                 a.item(href='/account') 更新我的資料
                 if user.isAdmin
                   a.item(href='/completed') Study Progress
                   a.item(href='/actors') Simulation (Actors)
-                a.item(href='/com') 查看社區規則
               a.item.logoutLink 退出登錄
 .mobile.only.row
   .ui.fluid.top.fixed.four.item.menu
@@ -56,10 +55,9 @@
         i.dropdown.icon
         .left.menu
           if user.consent
-            a.item(href='/me') 我的資料
+            a.item(href='/me') 我的帖子
             a.item(href='/account') 更新我的資料
             if user.isAdmin
               a.item(href='/completed') Study Progress
               a.item(href='/actors') Simulation (Actors)
-            a.item(href='/com') 查看社區規則
           a.item.logoutLink 退出登錄
