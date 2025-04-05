@@ -23,7 +23,7 @@ block content
             img#imgInp.ui.small.image(src='/user_avatar/'+user.profile.picture)
           else
             img#imgInp.ui.small.image(src=user.gravatar(60))
-        input#picinput(type='file', accept='image/*', capture='camera', name='picinput')
+        input#picinput(type='file', accept='image/*', name='picinput')
       button.ui.large.button.disabled(type='submit') 更新個人資料
     .ui.divider
     h3.ui.header(style="margin-top: 2em;") 更改密碼
