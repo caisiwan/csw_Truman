@@ -3,6 +3,12 @@ const validator = require('validator');
 const dotenv = require('dotenv');
 dotenv.config({ path: '.env' }); // See the file .env.example for the structure of .env
 const User = require('../models/User');
+const mturkGroupMap = {
+    "111": "SDmanylikes",
+    "222": "SPfewlikes",
+    "333": "SDmanylikes",
+    "444": "SPfewlikes",
+};
 
 /**
  * GET /login
@@ -25,8 +31,8 @@ exports.getLogin = (req, res) => {
  */
 exports.postLogin = (req, res, next) => {
     const validationErrors = [];
-    if (!validator.isEmail(req.body.email)) validationErrors.push({ msg: 'Please enter a valid email address.' });
-    if (validator.isEmpty(req.body.password)) validationErrors.push({ msg: 'Password cannot be blank.' });
+    if (!validator.isEmail(req.body.email)) validationErrors.push({ msg: '請輸入有效的郵箱地址' });
+    if (validator.isEmpty(req.body.password)) validationErrors.push({ msg: '密碼不能爲空' });
 
     if (validationErrors.length) {
         req.flash('errors', validationErrors);
@@ -96,8 +102,8 @@ exports.getSignup = (req, res) => {
  */
 exports.postSignup = async(req, res, next) => {
     const validationErrors = [];
-    if (!validator.isEmail(req.body.email)) validationErrors.push({ msg: 'Please enter a valid email address.' });
-    if (!validator.isLength(req.body.password, { min: 4 })) validationErrors.push({ msg: 'Password must be at least 4 characters long.' });
+    if (!validator.isEmail(req.body.email)) validationErrors.push({ msg: '請輸入有效的郵箱地址' });
+    if (!validator.isLength(req.body.password, { min: 4 })) validationErrors.push({ msg: '密碼必須大于4位數' });
     if (validator.escape(req.body.password) !== validator.escape(req.body.confirmPassword)) validationErrors.push({ msg: 'Passwords do not match.' });
     if (validationErrors.length) {
         req.flash('errors', validationErrors);
@@ -108,7 +114,7 @@ exports.postSignup = async(req, res, next) => {
     try {
         const existingUser = await User.findOne({ $or: [{ email: req.body.email }, { mturkID: req.body.mturkID }] }).exec();
         if (existingUser) {
-            req.flash('errors', { msg: 'An account with that email address or MTurkID already exists.' });
+            req.flash('errors', { msg: '該郵箱或編號已綁定其他賬號，請重新輸入' });
             return res.redirect('/signup');
         }
         /*###############################
@@ -116,22 +122,13 @@ exports.postSignup = async(req, res, next) => {
         ###############################*/
         const numConditions = process.env.NUM_EXP_CONDITIONS;
         const experimentalConditionNames = process.env.EXP_CONDITIONS_NAMES.split(",");
-        const conditionCounts = await User.aggregate([
-            { $group: { _id: "$experimentalCondition", count: { $sum: 1 } } }
-        ]);
-        const countsMap = new Map();
-        experimentalConditionNames.forEach(condition => countsMap.set(condition, 0));
-        conditionCounts.forEach(item => countsMap.set(item._id, item.count));
-        let minCount = Infinity;
-        let targetCondition = experimentalConditionNames[0];
-        for (const condition of experimentalConditionNames) {
-            const count = countsMap.get(condition);
-            if (count < minCount) {
-                minCount = count;
-                targetCondition = condition;
-            }
+        const mturkID = req.body.mturkID;
+        const experimentalCondition = mturkGroupMap[mturkID];
+        
+        if (!experimentalCondition) {
+            req.flash('errors', { msg: '編號不存在，請正確輸入我們向您發送的編號！' });
+            return res.redirect('/signup');
         }
-        const experimentalCondition = targetCondition;
 
         const surveyLink = process.env.POST_SURVEY ?
             process.env.POST_SURVEY +
@@ -183,8 +180,8 @@ exports.postSignupInfo = async(req, res, next) => {
         }
 
         await user.save();
-        req.flash('success', { msg: 'Profile information has been updated.' });
-        return res.redirect('/');
+        req.flash('success', { msg: '個人資料已更新！' });
+        return res.redirect('/com');
     } catch (err) {
         next(err);
     }
@@ -236,7 +233,7 @@ exports.getMe = async(req, res) => {
  */
 exports.postUpdateProfile = async(req, res, next) => {
     const validationErrors = [];
-    if (!validator.isEmail(req.body.email)) validationErrors.push({ msg: 'Please enter a valid email address.' });
+    if (!validator.isEmail(req.body.email)) validationErrors.push({ msg: '請輸入有效的郵箱地址' });
     if (validationErrors.length) {
         req.flash('errors', validationErrors);
         return res.redirect('/account');
@@ -253,11 +250,11 @@ exports.postUpdateProfile = async(req, res, next) => {
         }
 
         await user.save();
-        req.flash('success', { msg: 'Profile information has been updated.' });
+        req.flash('success', { msg: '個人資料更新成功！' });
         res.redirect('/account');
     } catch (err) {
         if (err.code === 11000) {
-            req.flash('errors', { msg: 'The email address you have entered is already associated with an account.' });
+            req.flash('errors', { msg: '該郵箱已綁定其他賬號，請重新輸入' });
             return res.redirect('/account');
         }
         next(err);
@@ -281,7 +278,7 @@ exports.postUpdatePassword = async(req, res, next) => {
         const user = await User.findById(req.user.id).exec();
         user.password = req.body.password;
         await user.save();
-        req.flash('success', { msg: 'Password has been changed.' });
+        req.flash('success', { msg: '密碼修改成功！' });
         res.redirect('/account');
     } catch (err) {
         next(err);
