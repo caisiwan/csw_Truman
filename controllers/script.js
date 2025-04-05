@@ -61,7 +61,11 @@ exports.getScript = async(req, res, next) => {
         // Get the newsfeed and render it.
         const finalfeed = helpers.getFeed(user_posts, script_feed, user, process.env.FEED_ORDER, (process.env.REMOVE_FLAGGED_CONTENT == 'TRUE'), true);
         console.log("Script Size is now: " + finalfeed.length);
-        res.render('script', { script: finalfeed, showNewPostIcon: true });
+        res.render('script', {
+            script: finalfeed,
+            showNewPostIcon: true,
+            experimentalCondition: user.experimentalCondition // 新增此行
+          });          
     } catch (err) {
         next(err);
     }
@@ -118,7 +122,7 @@ exports.newPost = async(req, res) => {
             await user.save();
             res.redirect('/');
         } else {
-            req.flash('errors', { msg: 'ERROR: Your post did not get sent. Please include a photo and a caption.' });
+            req.flash('errors', { msg: '帖子發布失敗：請上傳一張圖片並填充文案' });
             res.redirect('/');
         }
     } catch (err) {
