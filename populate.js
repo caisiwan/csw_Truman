@@ -7,6 +7,7 @@ console.log(color_start, 'Started populate.js script...');
 const async = require('async');
 const Actor = require('./models/Actor.js');
 const Script = require('./models/Script.js');
+const Notification = require('./models/Notification.js');
 const _ = require('lodash');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
@@ -15,10 +16,12 @@ const CSVToJSON = require("csvtojson");
 //Input Files
 const actor_inputFile = './input/actors.csv';
 const posts_inputFile = './input/posts.csv';
+const notifications_inputFile = './input/notifications (read, like).csv';
 
 // Variables to be used later.
 var actors_list;
 var posts_list;
+var notification_list;
 
 dotenv.config({ path: '.env' });
 
@@ -73,12 +76,21 @@ async function doPopulate() {
                     resolve("done");
                 });
             });
-        })
+        }).then(function(result) { //Convert the comments csv file to json, store in comment_list\
+            return new Promise((resolve, reject) => {
+                console.log(color_start, "Reading notification list...");
+                CSVToJSON().fromFile(notifications_inputFile).then(function(json_array) {
+                    notification_list = json_array;
+                    console.log(color_success, "Finished getting the notification list");
+                    resolve("done");
+                });
+            });
+
             /*************************
             Create all the Actors in the simulation
             Must be done before creating any other instances
             *************************/
-        .then(function(result) {
+        }).then(function(result) {
             console.log(color_start, "Starting to populate actors collection...");
             return new Promise((resolve, reject) => {
                 async.each(actors_list, async function(actor_raw, callback) {
@@ -116,6 +128,7 @@ async function doPopulate() {
                     }
                 );
             });
+
             /*************************
             Create each post and upload it to the DB
             Actors must be in DB first to add them correctly to the post
@@ -156,19 +169,66 @@ async function doPopulate() {
                         }
                         // Return response
                         console.log(color_success, "All posts added to database!")
-                        mongoose.connection.close(); // 关闭连接
                         resolve('Promise is resolved successfully.');
+                        return 'Loaded Posts';
                     }
                 );
             });
+
             /*************************
-            Creates inline comments for each post
-            Looks up actors and posts to insert the correct comment
-            Does this in series to insure comments are put in the correct order
-            Takes a while to run because of this.
+            Creates each notification(likes, reads) and uploads it to the DB
+            Actors must be in DB first to add them correctly to the post
             *************************/
+        }).then(function(result) {
+            console.log(color_start, "Starting to populate notifications (likes, reads) collection...");
+            return new Promise((resolve, reject) => {
+                async.each(notification_list, async function(new_notify, callback) {
+                        const act = await Actor.findOne({ username: new_notify.actor }).exec();
+                        if (act) {
+                            const notifydetail = {
+                                actor: act,
+                                notificationType: new_notify.type,
+                                time: timeStringToNum(new_notify.time),
+                                class: new_notify.class,
+                                condition: new_notify.condition
+                            };
+
+                            if (new_notify.userPostID >= 0 && new_notify.userPostID) {
+                                notifydetail.userPostID = new_notify.userPostID;
+                            } else if (new_notify.userReplyID >= 0 && new_notify.userReplyID) {
+                                notifydetail.userReplyID = new_notify.userReplyID;
+                            } else if (new_notify.actorReply >= 0 && new_notify.actorReply) {
+                                notifydetail.actorReply = new_notify.actorReply;
+                            }
+
+                            const notify = new Notification(notifydetail);
+                            try {
+                                await notify.save();
+                            } catch (err) {
+                                console.log(color_error, "ERROR: Something went wrong with saving notification(like, read) in database");
+                                next(err);
+                            }
+                        } else { //Else no actor found
+                            console.log(color_error, "ERROR: Actor not found in database");
+                            callback();
+                        }
+                    },
+                    function(err) {
+                        if (err) {
+                            console.log(color_error, "ERROR: Something went wrong with saving notifications in database");
+                            callback(err);
+                        }
+                        // Return response
+                        console.log(color_success, "All notifications added to database!");
+                        mongoose.connection.close();
+                        resolve('Promise is resolved successfully.');
+                        return 'Loaded Notifications';
+                    }
+                );
+            });
         })
-}        
+}
+       
 
 //capitalize a string
 String.prototype.capitalize = function() {
@@ -193,10 +253,9 @@ function timeStringToNum(v) {
 //Create a random number (for the number of likes) with a weighted distrubution
 //This is for posts
 function getLikes() {
-    var notRandomNumbers = [1, 1, 1, 2, 2, 2, 3, 3, 4, 4, 5, 6];
-    var idx = Math.floor(Math.random() * notRandomNumbers.length);
-    return notRandomNumbers[idx];
+    return Math.floor(Math.random() * 50) + 1; // 1~50
 }
+
 
 //Create a radom number (for likes) with a weighted distrubution
 //This is for comments
