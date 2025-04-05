@@ -14,7 +14,7 @@ block content
             img#imgInp.ui.small.image(src='/user_avatar/'+user.profile.picture)
           else
             img#imgInp.ui.small.image(src=user.gravatar(60))
-        input#picinput(type='file', accept='image/*', capture='camera', name='picinput')
+        input#picinput(type='file', accept='image/*', name='picinput')
       .inline.fields(style='padding-top: 10px !important;')
         .sixteen.wide.field
           label(for='name') 姓名
