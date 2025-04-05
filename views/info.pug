@@ -3,16 +3,16 @@ extends ui_layout
 block content
   .ui.text.container(style="margin-top: 2em; margin-bottom: 2em;")
     h1(style="text-align: center;") 歡迎來到 LifeHere!
-    h3 以下是你可以在這裏做的一些事情：
+    h3 以下是一些你可以在這裏體驗的事情：
     ul
-        li 創建帖子，展示你的生活！上傳已有的照片，或者用你的手機拍攝新照片。
-        li 浏覽、點贊、評論他人的帖子。
-        li 填寫你的個人資料，你可以根據自己的習慣展示或不展示任何信息。
-        li 當通知鈴铛變紅時，說明你收到了新的通知，記得去查看哦！
+        li 創建帖子，展示你的生活！你可以上傳你想分享的圖片，並爲它配上文案。
+        li 浏覽、點贊、評論其他人的帖子！你可以在這裏看到其他人的生活。
+        li 填寫你的個人資料！你可以根據自己的習慣展示或不展示任何信息。
+        li 當頁面右上角的通知鈴铛<b>🔔</b>變紅時，說明你收到了新的通知，記得去查看哦！
     img.ui.centered.image(src='/public/esl-howto.png')
     .ui.big.green.labeled.icon.button.interest
         i.rocket.icon
-        |   繼續
+        |   Continue
 
     script.
         $('.ui.big.green.labeled.icon.button.interest').on('click', function() {
