@@ -91,3 +91,16 @@ textarea.newcomment {
 .modal .ui.form .grouped.fields .field {
     margin-left: 5px !important;
 }
+
+/* 移动端演员信息卡片样式 */
+@media only screen and (max-width: 767px) {
+  .sixteen.wide.mobile.column .ui.card {
+    width: 100%;
+    max-width: 600px; /* 与帖子同宽 */
+    margin: 0 auto 20px; /* 居中并添加底部间距 */
+  }
+  /* 调整内容区域与演员信息栏的间距 */
+  #content.eight.wide.computer.ten.wide.tablet.sixteen.wide.mobile.column {
+    margin-top: 0 !important;
+  }
+}
