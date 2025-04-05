@@ -60,12 +60,11 @@ block content
                     .summary
                       a(href='/user/'+best[0].username)=best[0].profile.name
                       if best.length != 1
-                        |  and 
-                        a.others(key=notification.key)=(best.length+notification.actors.length-1)+" others"
-                        |  have
+                        |  和其他 
+                        a.others(key=notification.key)=(best.length+notification.actors.length-1)+" 人"
+                        |  贊了您的帖子。
                       else 
-                        |  has
-                      |  liked your post. 
+                        |  贊了您的帖子。
                       .date=notification.time
               when 'reply'
                 .event
