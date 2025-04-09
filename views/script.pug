@@ -34,7 +34,8 @@ block content
       form#postform.ui.feed.form(action='/post/new', method='POST', enctype='multipart/form-data')
         input(type='hidden', name='_csrf', value=_csrf)
         .field
-          textarea(rows='2', placeholder=' ', name='body')
+          - const isSPGroup = ['SPmanylikes', 'SPfewlikes'].includes(experimentalCondition);
+          textarea(rows='2', placeholder = isSPGroup ? '在這裏展現你美好的、理想的生活吧！你可以展示自己美好的一面，分享積極的想法、感受或經曆' : '在這裏展現你真實的、不加修飾的生活吧！你可以展示多面的自己，盡情表達任意的想法、感受或經曆', name='body')
         .field.image-upload
           label(for='picinput')
             .image.content
