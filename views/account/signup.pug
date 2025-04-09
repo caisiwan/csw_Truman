@@ -9,8 +9,8 @@ block content
       form.ui.form(id='signup-form', action=(process.env.POST_SURVEY_WITH_QUALTRICS ? `/signup?r_id=${r_id}`: '/signup'), method='POST')
         input(type='hidden', name='_csrf', value=_csrf)
         .field
-          label(for='username') 用戶名
-          input(type='text', name='username', id='username', placeholder='用戶名', autofocus, required)
+          label(for='username') 昵稱
+          input(type='text', name='username', id='username', placeholder='昵稱', autofocus, required)
         .field
           label(for='mturkID') !{process.env.IDENTIFIER}
           input(type='text', name='mturkID', id='mturkID', placeholder=process.env.IDENTIFIER, required)
@@ -18,10 +18,10 @@ block content
           label(for='email') 電子郵箱（不會被公開顯示）
           input(type='email', name='email', id='email', placeholder='電子郵箱', required)
         .field
-          label(for='password') 密碼
+          label(for='password') 密碼（請務必牢記你的密碼）
           input(type='password', name='password', id='password', placeholder='密碼', minlength="4", required)
         .field
-          label(for='confirmPassword') 確認密碼 
+          label(for='confirmPassword') 確認密碼（請務必牢記你的密碼） 
           input(type='password', name='confirmPassword', id='confirmPassword', placeholder='確認密碼', minlength="4", required)
           span(style="color: green; visibility:hidden; display: inline-block;")#passwordsMatch  
             i.icon.check 
