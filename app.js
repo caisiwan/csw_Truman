@@ -160,7 +160,7 @@ app.disable('x-powered-by');
 // app.use(lusca.xframe('allow-from https://cornell.qualtrics.com/'));
 app.use((req, res, next) => {
     res.locals.user = req.user;
-    res.locals.cdn = process.env.CDN;
+//    res.locals.cdn = process.env.CDN;
     next();
 });
 
