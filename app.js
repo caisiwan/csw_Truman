@@ -181,7 +181,8 @@ app.use((req, res, next) => {
 
 app.use('/public', express.static(path.join(__dirname, 'public'), { maxAge: 31557600000 }));
 app.use('/semantic', express.static(path.join(__dirname, 'semantic'), { maxAge: 31557600000 }));
-app.use(express.static(path.join(__dirname, 'uploads'), { maxAge: 31557600000 }));
+app.use('/user_post', express.static(path.join('/data', 'uploads', 'user_post'), { maxAge: 31557600000 }));
+app.use('/user_avatar', express.static(path.join('/data', 'uploads', 'user_avatar'), { maxAge: 31557600000 }));
 app.use('/post_pictures', express.static(path.join(__dirname, 'post_pictures'), { maxAge: 31557600000 }));
 app.use('/profile_pictures', express.static(path.join(__dirname, 'profile_pictures'), { maxAge: 31557600000 }));
 
