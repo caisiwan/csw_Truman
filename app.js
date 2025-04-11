@@ -25,7 +25,7 @@ fs.readFileAsync = util.promisify(fs.readFile);
  * Files are uploaded when user's upload their profile photos and post photos.
  */
 var userpost_options = multer.diskStorage({
-    destination: path.join(__dirname, 'uploads/user_post'),
+    destination: path.join('/data', 'uploads/user_post'),
     filename: function(req, file, cb) {
         var lastsix = req.user.id.substr(req.user.id.length - 6);
         var prefix = lastsix + Math.random().toString(36).slice(2, 10);
@@ -33,7 +33,7 @@ var userpost_options = multer.diskStorage({
     }
 });
 var useravatar_options = multer.diskStorage({
-    destination: path.join(__dirname, 'uploads/user_avatar'),
+    destination: path.join('/data', 'uploads/user_avatar'),
     filename: function(req, file, cb) {
         var prefix = req.user.id + Math.random().toString(36).slice(2, 10);
         cb(null, prefix + file.originalname.replace(/[^A-Z0-9]+/ig, "_"));
